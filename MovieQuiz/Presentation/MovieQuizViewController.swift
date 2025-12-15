@@ -130,6 +130,8 @@ final class MovieQuizViewController: UIViewController {
     }
     
     private func show(quiz step: QuizStepViewModel) {
+      imageView.layer.cornerRadius = 20
+      imageView.layer.borderColor = UIColor.ypBlack.cgColor
       imageView.image = step.image
       textLabel.text = step.question
       counterLabel.text = step.questionNumber
@@ -142,7 +144,6 @@ final class MovieQuizViewController: UIViewController {
             title: result.title,
             message: result.text,
             preferredStyle: .alert)
-        
         let action = UIAlertAction(title: result.buttonText, style: .default) { _ in
             self.currentQuestionIndex = 0
             self.correctAnswers = 0
@@ -166,7 +167,6 @@ final class MovieQuizViewController: UIViewController {
         }else{
             imageView.layer.borderColor = UIColor.ypRed.cgColor
         }
-        imageView.layer.cornerRadius = 20
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
             self.showNextQuestionOrResults()
         }
