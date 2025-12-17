@@ -1,9 +1,7 @@
 import UIKit
 final class MovieQuizViewController: UIViewController,QuestionFactoryDelegate {
     func didReceiveNextQuestion(question: QuizQuestion?) {
-        guard let question = question else {
-            return
-        }
+        guard let question else { return }
         currentQuestion = question
         let viewModel = convert(model: question)
         DispatchQueue.main.async { [weak self] in
@@ -23,7 +21,20 @@ final class MovieQuizViewController: UIViewController,QuestionFactoryDelegate {
     private let statisticService: StatisticServiceProtocol = StatisticService()
     private var currentQuestion: QuizQuestion?
     private var alertPresenter = AlertPresenter()
-
+    private let dateFormatter: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.locale = Locale(identifier: "ru_RU")
+        formatter.dateFormat = "d.MM.yyyy HH:mm"
+        return formatter
+    }()
+    private let percentFormatter: NumberFormatter = {
+        let formatter = NumberFormatter()
+        formatter.numberStyle = .decimal
+        formatter.maximumFractionDigits = 2
+        formatter.minimumFractionDigits = 2
+        formatter.locale = Locale(identifier: "ru_RU")
+        return formatter
+    }()
     override func viewDidLoad() {
         // берём текущий вопрос из массива вопросов по индексу текущего вопроса
         super.viewDidLoad()
@@ -34,16 +45,12 @@ final class MovieQuizViewController: UIViewController,QuestionFactoryDelegate {
     }
     
     @IBAction private func yesButtonClicked(_ sender: UIButton) {
-        guard let currentQuestion = currentQuestion else {
-            return
-        }
+        guard let currentQuestion else { return }
         showAnswerResult(isCorrect: currentQuestion.correctAnswer)
     }
     
     @IBAction private func noButtonClicked(_ sender: UIButton) {
-        guard let currentQuestion = currentQuestion else {
-            return
-        }
+        guard let currentQuestion else { return }
         showAnswerResult(isCorrect: !currentQuestion.correctAnswer)
     }
     
@@ -65,11 +72,9 @@ final class MovieQuizViewController: UIViewController,QuestionFactoryDelegate {
     
     private func show(quiz result: QuizResultsViewModel) {
         let best = statisticService.bestGame
-        let totalAccuracy = String(format: "%.2f", statisticService.totalAccuracy)
-        let formatter = DateFormatter()
-        formatter.locale = Locale(identifier: "ru_RU")
-        formatter.dateFormat = "d.MM.yyyy HH:mm"
-        let dateString = formatter.string(from: best.date)
+        let accuracyNumber = NSNumber(value: statisticService.totalAccuracy)
+        let totalAccuracy = percentFormatter.string(from: accuracyNumber) ?? "0.00"
+        let dateString = dateFormatter.string(from: best.date)
         let message =
         """
         Ваш результат: \(correctAnswers)/\(questionsAmount)
@@ -102,7 +107,7 @@ final class MovieQuizViewController: UIViewController,QuestionFactoryDelegate {
             imageView.layer.borderColor = UIColor.ypRed.cgColor
         }
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) { [weak self] in
-            guard let self = self else { return }
+            guard let self else { return }
             self.showNextQuestionOrResults()
         }
     }
